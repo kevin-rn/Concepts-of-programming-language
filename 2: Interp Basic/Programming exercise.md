@@ -6,17 +6,13 @@ object Solution {
   /**
     * Write an s-expression whose result is 42.
     */
-  def is42 = {
-   42.toString
-  }
+  def is42 = "42"
 
   /**
     * Write an s-expression that evaluates to a list containing the numbers
     * between and including 0 and 3.
     */
-  def between0and3 = {
-    "(cons 0 (cons 1 (cons 2 (cons 3 nil))))"
-  }
+  def between0and3 = "(list 0 1 2 3)"
 
   /**
     * You can also add your own defs below and test them by calling them
