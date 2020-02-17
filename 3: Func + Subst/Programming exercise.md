@@ -1,17 +1,16 @@
 Example Programs
 
 Implement the four programs described below. The programs are interpreted by an interpreter of week 3.  
-1. Conditional Expression  
-
+##### 1. Conditional Expression  
 Make an expression with a free identifier x that does the following: When x + 5 equals 13, return 0, otherwise return 1.  
-2. Curried cons  
 
+##### 2. Curried cons  
 Make an expression that returns a function implementing a curried version of cons.  
-3. Recursive Factorial Function  
 
+##### 3. Recursive Factorial Function  
 Make an expression that returns a recursive function that computes the factorial of its first argument.  
-4. Capture Avoidance  
 
+##### 4. Capture Avoidance  
 Define an expression with a free identifier that could violate name capture avoidance.   
 Your expression should crash with a capture-avoiding interpreter, and return a result when run with a wrong interpreter.  
 
