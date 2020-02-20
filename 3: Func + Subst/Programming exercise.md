@@ -41,7 +41,7 @@ object Solution {
   def fact = "(lambda (x) (let ((f (lambda (self x) (if (num= x 0) 1 (* x (self self (- x 1))) ) )))(f f x)))"
 
   /** 4. Capture Avoidance */
-  def capturing = "(lambda (x) (+ 1 y y))"
+  def capturing = "(let ((twice (lambda (f) (lambda (x) (f (f x)))))) (let ((quad (twice (lambda (y) (+ y x))))) (quad 1)))"
 
 }
 
