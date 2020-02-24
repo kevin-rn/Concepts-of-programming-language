@@ -19,6 +19,16 @@ case class InException() extends InterpException()
 
 object Parser {
   def parse(str: String): ExprExt = parse(Reader.read(str))
+  
+  def condList(cs: List[SExpr], e: Boolean): List[(ExprExt, ExprExt)] = {
+    val list = if(e) cs.take(cs.size-1) else cs
+    list.foldLeft(List[(ExprExt, ExprExt)]()) {
+              case (previous, next) => next match {
+                case SList(List(cond, out)) if(cond != SSym("else")) => previous :+ (parse(cond) , parse(out))
+                case _ => throw new ParException
+          }}
+    
+  }
 
   def parse(sexpr: SExpr): ExprExt = sexpr match {
     case SNum(i) => NumExt(i)
@@ -26,20 +36,17 @@ object Parser {
       case "true" => TrueExt()
       case "false" => FalseExt()
       case "nil" => NilExt()
-      case "()" => throw new ParException()
-      case _ => parse(str)
+      case _ => throw new ParException()
       }
     case SList(SSym("if")::List(c, l, r)) => IfExt(parse(c), parse(l), parse(r))
     case SList(SSym("list")::l) => ListExt(l.map(x => parse(x)))
     case SList(SSym("cond")::cs) => {
-        val list = cs.foldLeft(List[(ExprExt, ExprExt)]()){
-            case (previous, next) => next match {
-              case SList(List(SSym("else"), _)) => previous
-              case SList(List(cond, out)) => previous :+ (parse(cond) , parse(out))
-        }}
         cs(cs.size - 1) match {
-          case SList(List(SSym("else"), out)) => if(list.size==0) throw new ParException() else CondEExt(list, parse(out))
-          case _ => CondExt(list)
+          case SList(List(SSym("else"), out)) => {
+            val list = condList(cs, true)
+            if(list.size==0) throw new ParException() else CondEExt(list, parse(out))
+          }
+          case _ => CondExt(condList(cs, false))
         }
       }
     case SList(List(s, l, r)) => s match {
@@ -174,6 +181,7 @@ object Interp {
     case UndefinedC() | _ => throw new InException()
   }
 }
+
 ```
 
 
