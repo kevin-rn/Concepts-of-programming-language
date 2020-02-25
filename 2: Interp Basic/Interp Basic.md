@@ -22,6 +22,7 @@ object Parser {
   
   def condList(cs: List[SExpr], e: Boolean): List[(ExprExt, ExprExt)] = {
     val list = if(e) cs.take(cs.size-1) else cs
+    if(list.size==0) throw new ParException()
     list.foldLeft(List[(ExprExt, ExprExt)]()) {
               case (previous, next) => next match {
                 case SList(List(cond, out)) if(cond != SSym("else")) => previous :+ (parse(cond) , parse(out))
@@ -42,10 +43,7 @@ object Parser {
     case SList(SSym("list")::l) => ListExt(l.map(x => parse(x)))
     case SList(SSym("cond")::cs) => {
         cs(cs.size - 1) match {
-          case SList(List(SSym("else"), out)) => {
-            val list = condList(cs, true)
-            if(list.size==0) throw new ParException() else CondEExt(list, parse(out))
-          }
+          case SList(List(SSym("else"), out)) => CondEExt(condList(cs, true), parse(out))
           case _ => CondExt(condList(cs, false))
         }
       }
