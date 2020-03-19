@@ -82,13 +82,9 @@ object Desugar {
     case BinOpExt(s, l, r) => s match {
       case "+" => PlusC(desugar(l), desugar(r)) 
       case "*" => MultC(desugar(l), desugar(r))
-      case "-" => (desugar(l), desugar(r)) match {
-        case (TrueC(), _) | (FalseC(), _) | (_, TrueC()) | (_, FalseC()) => throw new DesException()
-        case _ => PlusC(desugar(l), MultC(NumC(-1), desugar(r))) 
-      }
+      case "-" => PlusC(desugar(l), MultC(NumC(-1), desugar(r))) 
       case "and" => IfC(desugar(l), desugar(r), FalseC())
       case "or" => IfC(desugar(l), TrueC(), desugar(r))
-
       case "num=" => EqNumC(desugar(l), desugar(r))
       case "num<" => LtC(desugar(l), desugar(r))
       case "num>" => LtC(desugar(r), desugar(l))
@@ -96,10 +92,7 @@ object Desugar {
       case _ => throw new DesException()
     }
     case UnOpExt(s, e) => s match {
-      case "-" => desugar(e) match {
-        case TrueC() | FalseC() => throw new DesException()
-        case _ => MultC(NumC(-1), desugar(e))
-      }
+      case "-" => MultC(NumC(-1), desugar(e))
       case "not" => IfC(desugar(e), FalseC(), TrueC())
       case "head" => HeadC(desugar(e))
       case "tail" => TailC(desugar(e))
