@@ -439,39 +439,27 @@ object TypeChecker {
     case NilExt(listTy) => ListT(listTy)
     case IdExt(c) => lookup(c, nv)
     case BinOpExt(s, l, r) => s match {
-      case "+" | "*" | "-" => typeOf(l, nv) match {
-        case NumT() => typeOf(r, nv) match {
-          case NumT() => NumT()
-          case _ => throw TypException()
-        }
-        case _ => throw TypException()
+      case "+" | "*" | "-" => (typeOf(l, nv), typeOf(r, nv)) match {
+        case (NumT(), NumT()) => NumT()
+        case (_,_) => throw TypException()
       }
-      case "and" | "or" => typeOf(l, nv) match {
-        case BoolT() => typeOf(r, nv) match {
-          case BoolT() => BoolT()
-          case _ => throw TypException()
-        }
-        case _ => throw TypException()
+      case "and" | "or" => (typeOf(l, nv), typeOf(r, nv)) match {
+          case (BoolT(), BoolT()) => BoolT()
+          case  (_,_) => throw TypException()
       }
-      case "num=" | "num<" | "num>" => typeOf(l, nv) match {
-         case NumT() => typeOf(r, nv) match {
-          case NumT() => BoolT()
-          case _ => throw TypException()
-        }
-        case _ => throw TypException()
+      case "num=" | "num<" | "num>" => (typeOf(l, nv), typeOf(r, nv)) match {
+          case (NumT(), NumT()) => BoolT()
+          case  (_,_) => throw TypException()
       }
       case "cons" => (typeOf(l, nv), typeOf(r, nv)) match {
           case (e1, ListT(e2)) if(e1 == e2) => ListT(e1)
-          case (e1, e2) => throw TypException()
+          case (_,_) => throw TypException()
       }
       case "setbox" => (typeOf(l, nv), typeOf(r, nv)) match { 
         case (RefT(e1), e2) if(e1 == e2) => e1
         case (_,_) => throw TypException()
       }
-      case "seq" => {
-        val e1 = typeOf(l, nv); val e2 = typeOf(r, nv)
-        if(e1 == e2) e2 else throw TypException()
-      }
+      case "seq" => val ty = typeOf(r, nv); if(typeOf(l, nv) == ty) ty else throw TypException()
       case "pair" => PairT(typeOf(l, nv), typeOf(r, nv))
       case _ => throw TypException()
     }
@@ -502,10 +490,7 @@ object TypeChecker {
       ListT(listTy)
     }
     case IfExt(c, t, e) => typeOf(c, nv) match {
-      case BoolT() => { 
-        val (tt, te) = (typeOf(t, nv), typeOf(e, nv))
-        if (tt == te) tt else throw new TypException()
-      }
+      case BoolT() => val ty = typeOf(t, nv); if (ty == typeOf(e, nv)) ty else throw new TypException()
       case _ => throw TypException()
     }
     case FdExt(params, body) => FunT(params.map(_.ty), typeOf(body, params.map(x => TBind(x.name, x.ty)):::nv))
@@ -540,6 +525,4 @@ object SafeInterp {
   }
 
 }
-
-
 ```
