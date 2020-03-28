@@ -92,6 +92,10 @@ abstract class Solution extends FunSuite {
     assertResult(NumT()) { typeOf("(let ((x 1)) (let ((y (set x 2)) (z x)) z))") }
   }
   
+  test("type check - bool") {
+    assertResult(BoolT()) { typeOf("(let ((x true) (y false)) (and x y))") }
+  }
+  
  /***
   * Incorrect Type check cases
   */
@@ -100,15 +104,17 @@ abstract class Solution extends FunSuite {
     intercept[TypeException] { typeOf("((lambda () true) 2)") } 
   }
   
-  test("incorrect type check - arithmetic") {
+  test("incorrect type check - operators") {
     intercept[TypeException] { typeOf("(+ 1 true)") }
+    intercept[TypeException] { typeOf("(and 1 1)") }
+    intercept[TypeException] { typeOf("(num= true false)") }
   }
   
   test("incorrect type check - list operations") {
     intercept[TypeException] { typeOf("(head 5)") }
     intercept[TypeException] { typeOf("(tail 5)") }
     intercept[TypeException] { typeOf("(is-nil 5)") } //-
-    intercept[TypeException] { typeOf("(list : Num ( true true false ))") } //-
+    intercept[TypeException] { typeOf("(list : Num (true false))") } //-
   }
 
   test("incorrect type check - if") {
@@ -118,14 +124,10 @@ abstract class Solution extends FunSuite {
   }
   
   test("incorrect type check - cons & boolean nil") {
-    intercept[TypeException] { typeOf("(cons 4 (cons 5 (cons 6 (nil : Bool))))") }
+    intercept[TypeException] { typeOf("(cons 5 (nil : Bool))") }
+
   }
   
-  test("incorrect type check - boolean") {
-    intercept[TypeException] { typeOf("(and 1 1)") }
-    intercept[TypeException] { typeOf("(num= true false)") } //--
-  }
-
   /**
     * Think about this for a while,
     * a lot of bad behavior will now throw a
@@ -161,6 +163,4 @@ abstract class Solution extends FunSuite {
   def safeInterp(s: String): Value
 
 }
-
-
 ```
