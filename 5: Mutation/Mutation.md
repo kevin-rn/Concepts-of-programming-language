@@ -94,8 +94,8 @@ object Desugar {
   }
   
   def dummy(binds: List[LetBindExt], body: ExprExt): ExprC = binds match {
-    case LetBindExt(_,_)::Nil => SeqC(SetC(binds.head.name, desugar(binds.head.value)), desugar(body))
-    case LetBindExt(_,_)::tail => SeqC(SetC(binds.head.name, desugar(binds.head.value)), dummy(tail, body))
+    case LetBindExt(name, value)::Nil => SeqC(SetC(name, desugar(value)), desugar(body))
+    case LetBindExt(name, value)::tail => SeqC(SetC(name, desugar(value)), dummy(tail, body))
     case _ => throw new DesException() 
   }
 }
@@ -117,12 +117,13 @@ object Interp {
   }
   
   def updateStore(bindings: List[(String, ExprC)], nv: PointerEnvironment, st: Store): (PointerEnvironment, Store) = bindings match {
-    case Nil => (nv, st)
+    case Nil => (Nil, st)
     case (str, e)::tail => {
       val (value, st1) = interp(e, nv, st)
-      val location = st1.size
+      val (nv1, st2) = updateStore(tail, nv, st1)
+      val location = st2.size
       val pointer = Pointer(str, location)
-      updateStore(tail, pointer::nv, Cell(location, value)::st1)
+      (pointer::nv1, Cell(location, value)::st2)
     }
   }
   
