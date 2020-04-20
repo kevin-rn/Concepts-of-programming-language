@@ -13,8 +13,8 @@ case class InException() extends InterpException()
 
 object Desugar {
   def dummy(binds: List[LetBindExt], body: ExprExt): ExprC = binds match {
-    case LetBindExt(_,_)::Nil => SeqC(SetC(binds.head.name, desugar(binds.head.value)), desugar(body))
-    case LetBindExt(_,_)::tail => SeqC(SetC(binds.head.name, desugar(binds.head.value)), dummy(tail, body))
+    case LetBindExt(name,value)::Nil => SeqC(SetC(name, desugar(value)), desugar(body))
+    case LetBindExt(name,value)::tail => SeqC(SetC(name, desugar(value)), dummy(tail, body))
     case _ => throw new DesException() 
   }
   
